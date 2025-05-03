@@ -9,6 +9,9 @@ You can install the hooks in one of two ways:
 ### Option 1: Using the Setup Script
 
 1. Clone this repository into your project's root directory.
+```bash
+git clone https://github.com/kurianvarkey/git-commit-hooks.git
+```
 2. Run the setup script:
 
 ```bash
