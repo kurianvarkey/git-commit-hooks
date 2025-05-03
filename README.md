@@ -27,6 +27,46 @@ git config core.hooksPath .githooks
 chmod +x .githooks/commit-msg
 chmod +x .githooks/pre-commit
 ```
+## Configuration
+
+The Git hooks can be configured by modifying the `pre-commit` and `commit-msg` files in the `.githooks` directory.
+
+## Features
+
+### Pre-Commit Hook
+
+* Example usage is to checks for code formatting issues. For example, in this repository, it is using [Laravel Pint](https://github.com/laravel/pint) to check for code formatting issues in PHP files. Please amend the `pre-commit` file to your needs.
+* Exits with a non-zero status code if any issues are found.
+
+### Commit Message Hook
+
+* Checks the commit message for compliance with the [Conventional Commits](https://conventionalcommits.org/) specification.
+* Exits with a non-zero status code if the commit message does not comply with the specification.
+* Supports the following commit types:
+	+ `feat`: New feature.
+	+ `fix`: Bug fix.
+	+ `refactor`: Refactoring.
+	+ `chore`: Updating dependencies, etc.
+	+ `revert`: Reverting a change.
+	+ `db`: Database related tasks.
+	+ `docs`: Changes to documentation.
+	+ `build`: Building new release.
+	+ `ci`: CI/CD pipeline tasks.
+	+ `perf`: Performance tasks.
+	+ `style`: Formatting, missing semi-colons, etc.
+	+ `test`: Adding or refactoring tests.
+	+ `wip`: Work in progress commit to be squashed.
+
+### Example Commit Message
+
+```bash
+[version][type][Jira ticket id]: Commit message
+* Commit message line 2 (optional)
+```
+ Or
+ ```bash
+[version][type]: Commit message
+```
 
 ## commit-msg
 .githooks/commit-msg
@@ -116,46 +156,32 @@ if ! [[ $commit =~ $PATTERN ]]; then
     exit 1
 fi
 ```
-
-## Configuration
-
-The Git hooks can be configured by modifying the `pre-commit` and `commit-msg` files in the `.githooks` directory.
-
-## Features
-
-### Pre-Commit Hook
-
-* Example usage is to checks for code formatting issues. For example, in this repository, it is using [Laravel Pint](https://github.com/laravel/pint) to check for code formatting issues in PHP files. Please amend the `pre-commit` file to your needs.
-* Exits with a non-zero status code if any issues are found.
-
-### Commit Message Hook
-
-* Checks the commit message for compliance with the [Conventional Commits](https://conventionalcommits.org/) specification.
-* Exits with a non-zero status code if the commit message does not comply with the specification.
-* Supports the following commit types:
-	+ `feat`: New feature.
-	+ `fix`: Bug fix.
-	+ `refactor`: Refactoring.
-	+ `chore`: Updating dependencies, etc.
-	+ `revert`: Reverting a change.
-	+ `db`: Database related tasks.
-	+ `docs`: Changes to documentation.
-	+ `build`: Building new release.
-	+ `ci`: CI/CD pipeline tasks.
-	+ `perf`: Performance tasks.
-	+ `style`: Formatting, missing semi-colons, etc.
-	+ `test`: Adding or refactoring tests.
-	+ `wip`: Work in progress commit to be squashed.
-
-### Example Commit Message
-
+## pre-commit
+.githooks/pre-commit
 ```bash
-[version][type][Jira ticket id]: Commit message
-* Commit message line 2 (optional)
-```
- Or
- ```bash
-[version][type]: Commit message
+#!/bin/bash
+
+# Get the list of staged files
+staged_files=$(git diff --cached --name-only)
+
+# Filter for PHP files (configure as you need)
+staged_php_files=$(echo "$staged_files" | grep '\.php$')
+
+if [ -n "$staged_php_files" ]; then
+  # Run Pint only on the staged files
+  if ./vendor/bin/pint --version &>/dev/null; then
+    ./vendor/bin/pint --test $staged_php_files >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      echo "Code formatting issues found. Please run './vendor/bin/pint' to fix them"
+      exit 1
+    fi
+  else
+    echo -e "\e[31m Pre commit error: Laravel Pint installation not found and is required for php code formatting\e[0m"
+    exit 1
+  fi
+fi
+
+exit 0
 ```
 
 ## Usage
