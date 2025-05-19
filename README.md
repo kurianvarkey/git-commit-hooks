@@ -161,8 +161,8 @@ fi
 ```bash
 #!/bin/bash
 
-# Get the list of staged files
-staged_files=$(git diff --cached --name-only)
+# Get the list of staged files that are Added or Modified
+staged_files=$(git diff --cached --name-only --diff-filter=AM)
 
 # Filter for PHP files (configure as you need)
 staged_php_files=$(echo "$staged_files" | grep '\.php$')
